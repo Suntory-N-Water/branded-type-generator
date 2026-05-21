@@ -32,6 +32,30 @@ describe('Generator.tsx tests', () => {
     expect(outputValue).toContain('return p as Name;');
   });
 
+  test('`Use declare const for brand symbol` を有効にしたときに、Symbol が `declare const` で宣言されること', async () => {
+    const user = userEvent.setup();
+    render(<Generator />);
+
+    // `declare const` を使用するオプションを有効にする
+    const checkbox = screen.getByRole('checkbox', { name: /Use declare const for brand symbol/i });
+    await user.click(checkbox);
+
+    // テキストエリアをクリアして新しい内容を入力
+    const inputTextarea = screen.getByLabelText('Input Text');
+    await user.clear(inputTextarea);
+    await user.type(inputTextarea, 'id, number');
+
+    // 生成ボタンをクリック
+    const button = screen.getByRole('button', { name: 'Generate' });
+    await user.click(button);
+
+    // 出力テキストエリアに `declare const` が含まれていることを確認
+    const outputTextarea = screen.getByLabelText<HTMLTextAreaElement>('Output Text');
+    const outputValue = outputTextarea.value;
+
+    expect(outputValue).toContain('declare const idBrand: unique symbol;');
+  });
+
   test('不正な形式で入力されたときにエラーメッセージが表示されること', async () => {
     const user = userEvent.setup();
     render(<Generator />);

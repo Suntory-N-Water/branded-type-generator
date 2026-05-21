@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { usePreferredSymbolStyle } from '@/hooks/usePreferredSymbolStyle';
 import { generateBrandedTypes } from '@/lib/generateBrandedTypes';
 import { useState } from 'react';
 import { Textarea } from './ui/textarea';
@@ -9,9 +10,13 @@ id, number`);
   const [outputText, setOutputText] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [preferDeclareConst, setPreferDeclareConst] = usePreferredSymbolStyle();
+
   function handleGenerate() {
     try {
-      const result = generateBrandedTypes(inputText);
+      const result = generateBrandedTypes(inputText, {
+        useDeclareConst: preferDeclareConst,
+      });
       setOutputText(result);
       setErrorMessage('');
     } catch (error) {
@@ -35,7 +40,17 @@ id, number`);
         placeholder='Please input data in CSV or Tab separated format'
         aria-label='Input Text'
       />
-      <Button onClick={handleGenerate}>Generate</Button>
+      <div className='flex items-center gap-4 my-2'>
+        <Button onClick={handleGenerate}>Generate</Button>
+        <label className='flex items-center gap-2 text-sm cursor-pointer'>
+          <input
+            type='checkbox'
+            checked={preferDeclareConst}
+            onChange={(e) => setPreferDeclareConst(e.target.checked)}
+          />
+          Use <code>declare const</code> for brand symbol
+        </label>
+      </div>
       {errorMessage && <p className='text-red-600 font-semibold mb-4'>{errorMessage}</p>}
       <h1 className='text-xl font-bold mb-2'>Output</h1>
       <p>
