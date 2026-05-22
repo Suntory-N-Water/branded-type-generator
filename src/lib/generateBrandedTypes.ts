@@ -1,9 +1,19 @@
+type TypeGenerationPreferences = {
+  /**
+   * Set `true` to use `declare const fooBrand: unique symbol;` to remove the symbol from runtime code.
+   */
+  useDeclareConst: boolean;
+};
+
 /**
  * BrandedType生成関数
  * @param input 入力テキスト (CSV または タブ区切り)
  * @returns BrandedTypeのコードを文字列で返す
  */
-export function generateBrandedTypes(input: string): string {
+export function generateBrandedTypes(
+  input: string,
+  preferences: TypeGenerationPreferences,
+): string {
   const lines = input
     .split('\n')
     .map((line) => line.trim())
@@ -27,9 +37,13 @@ export function generateBrandedTypes(input: string): string {
     const camelCaseName = name.charAt(0).toUpperCase() + name.slice(1);
     const brand = `${name}Brand`;
 
+    const brandSymbol = preferences.useDeclareConst
+      ? `declare const ${brand}: unique symbol;`
+      : `const ${brand} = Symbol();`;
+
     output.push(
       `
-const ${brand} = Symbol();
+${brandSymbol}
 
 export type ${camelCaseName} = ${type} & { [${brand}]: unknown };
 
